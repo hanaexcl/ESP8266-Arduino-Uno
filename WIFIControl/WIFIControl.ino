@@ -1,5 +1,6 @@
 #include <SoftwareSerial.h>
 #include "ESP8266.h"
+#include <avr/wdt.h>
 
 #define SSID        "Home"
 #define PASSWORD    "tw2302934"
@@ -26,12 +27,11 @@ ESP8266 wifi(espSerial);
 void setup(void) {
   Serial.begin(9600);
   espSerial.begin(esp8266_buad);
-
+  wdt_enable(WDTO_8S);
   pinMode(controlPin_UP, OUTPUT);
   pinMode(controlPin_DOWN, OUTPUT);
   pinMode(controlPin_STOP, OUTPUT);
   pinMode(controlPin_INT, OUTPUT);
-
 
   Serial.println("狀態：begin初始化完成");
   
@@ -53,14 +53,16 @@ again:
     delay(2000);
     goto again;
   }
+
+  wdt_reset();
 }
 
 void loop(void) {
   delay(5000);
   
-  
   if (wifi.createTCP(dataHost, port)) {
     Serial.println("狀態：TCP連結成功");
+    wdt_reset();
   } else {
     Serial.println("狀態：TCP連結失敗");
     return;
